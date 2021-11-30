@@ -3,6 +3,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
+const helmet = require("helmet"); //http headers sécurité
+require('dotenv').config();
+
 
 //utilisation d'express, METTRE CETTE LIGNE AVANT LES APP.USE
 const app = express();
@@ -14,7 +17,7 @@ const userRoutes =require('./routes/user');
 
 
 //Connexion a la BDD de atlas
-mongoose.connect('mongodb+srv://AliNamooya:testtest@cluster0.jseu7.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/myFirstDatabase?retryWrites=true&w=majority`,
 { useNewUrlParser: true,
 useUnifiedTopology: true })
 .then(() => console.log('Connexion à MongoDB réussie !'))
@@ -31,8 +34,9 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 app.use(express.json());
+app.use(helmet());
 
-//téléchargement des images
+//Téléchargement des images
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 //Routes API

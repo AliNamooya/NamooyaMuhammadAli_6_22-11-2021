@@ -57,3 +57,47 @@ exports.deleteSauce = (req, res, next) => {
   })
   .catch(error => res.status(500).json({ error }));
 };
+
+
+//liker ou disliker
+exports.likeDislikeSauce = (req, res, next) => {
+  let like = req.body.like //bouton like sur la page
+  let userId = req.body.userId //le userID de l'utilisteur present sur la page
+  let sauceId = req.params.id //l'id de la sauce qui se trouve dans l'URL
+  
+  //Boucle switch qui va parcourir les 3 options
+  switch (like) {
+    case 1 : // lorsqu'on like 
+        Sauce.updateOne({ _id: sauceId }, { $push: { usersLiked: userId }, $inc: { likes: +1 }}) //$inc = incrémentation
+          .then(() => res.status(200).json({ message: `J'aime` }))
+          .catch((error) => res.status(400).json({ error }));
+            
+      break;
+
+    case 0 : // lorsqu'il y a ni like ni dislike
+        Sauce.findOne({ _id: sauceId })
+           .then((sauce) => {
+            if (sauce.usersLiked.includes(userId)) { 
+              Sauce.updateOne({ _id: sauceId }, { $pull: { usersLiked: userId }, $inc: { likes: -1 }})
+                .then(() => res.status(200).json({ message: `Neutre` }))
+                .catch((error) => res.status(400).json({ error }));
+            }
+            if (sauce.usersDisliked.includes(userId)) { 
+              Sauce.updateOne({ _id: sauceId }, { $pull: { usersDisliked: userId }, $inc: { dislikes: -1 }})
+                .then(() => res.status(200).json({ message: `Neutre` }))
+                .catch((error) => res.status(400).json({ error }));
+            }
+          })
+          .catch((error) => res.status(404).json({ error }));
+      break;
+
+    case -1 : //lorsqu'il y a un dislike
+        Sauce.updateOne({ _id: sauceId }, { $push: { usersDisliked: userId }, $inc: { dislikes: +1 }})
+          .then(() => { res.status(200).json({ message: `Je n'aime pas` }) })
+          .catch((error) => res.status(400).json({ error }));
+      break;
+      
+      default:
+        console.log(error);
+  }
+};
