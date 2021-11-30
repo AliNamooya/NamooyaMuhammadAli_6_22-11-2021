@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
 const helmet = require("helmet"); //http headers sécurité
-require('dotenv').config();
+require('dotenv').config();//cacher les données sensible
 
 
 //utilisation d'express, METTRE CETTE LIGNE AVANT LES APP.USE

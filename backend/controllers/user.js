@@ -1,15 +1,19 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');//hash le mdp
+const jwt = require('jsonwebtoken');//cree un token pour un utilisteur 
+const cryptojs = require('crypto-js'); //cryptage de l'email
+require('dotenv').config();//cacher les données sensibles dans le code
 
 const User = require('../models/User');
 
 
 
+
 exports.signup = (req, res, next) => {
+  const cryptEmail = cryptojs.HmacSHA256(req.body.email, process.env.DB_CRYPT_MDP).toString(cryptojs.enc.Base64); //cryptage de l'email avec HMAC-SHA256
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
       const user = new User({
-        email: req.body.email,
+        email: cryptEmail,
         password: hash
       });
       user.save()
@@ -23,7 +27,8 @@ exports.signup = (req, res, next) => {
 
 
 exports.login = (req, res, next) => {
-  User.findOne({ email: req.body.email })
+  const cryptEmail = cryptojs.HmacSHA256(req.body.email, process.env.DB_CRYPT_MDP).toString(cryptojs.enc.Base64); 
+  User.findOne({ email: cryptEmail })
     .then(user => {
       if (!user) {
         return res.status(401).json({ error: 'Utilisateur non trouvé !' });
@@ -37,7 +42,7 @@ exports.login = (req, res, next) => {
             userId: user._id,
             token: jwt.sign(
               { userId: user._id },
-              'RANDOM_TOKEN_SECRET',
+              process.env.DB_TOKEN_SECRET,
               { expiresIn: '24h' }
             )
           });
