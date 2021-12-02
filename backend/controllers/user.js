@@ -9,7 +9,7 @@ const User = require('../models/User');
 
 
 exports.signup = (req, res, next) => {
-  const cryptEmail = cryptojs.HmacSHA256(req.body.email, process.env.DB_CRYPT_MDP).toString(cryptojs.enc.Base64); //cryptage de l'email avec HMAC-SHA256
+  const cryptEmail = cryptojs.HmacSHA256(req.body.email, "testtest12").toString(); //cryptage de l'email avec HMAC-SHA256
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
       const user = new User({
@@ -27,7 +27,7 @@ exports.signup = (req, res, next) => {
 
 
 exports.login = (req, res, next) => {
-  const cryptEmail = cryptojs.HmacSHA256(req.body.email, process.env.DB_CRYPT_MDP).toString(cryptojs.enc.Base64); 
+  const cryptEmail = cryptojs.HmacSHA256(req.body.email, "testtest12").toString(); 
   User.findOne({ email: cryptEmail })
     .then(user => {
       if (!user) {
@@ -42,7 +42,7 @@ exports.login = (req, res, next) => {
             userId: user._id,
             token: jwt.sign(
               { userId: user._id },
-              process.env.DB_TOKEN_SECRET,
+              'RANDOM_TOKEN_SECRET',
               { expiresIn: '24h' }
             )
           });
