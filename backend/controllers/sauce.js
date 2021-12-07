@@ -64,10 +64,6 @@ exports.modifySauce = (req, res, next) => {
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      //récupération du userId dans le token pour ensuite le comparer
-      const token = req.headers.authorization.split(" ")[1];
-      const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
-      const userId = decodedToken.userId;
       if (sauce.userId == userId) {
         const filename = sauce.imageUrl.split("/images/")[1];
         fs.unlink(`images/${filename}`, () => {
