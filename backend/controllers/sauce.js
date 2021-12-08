@@ -1,6 +1,6 @@
 const Sauce = require("../models/Sauce");
 const fs = require("fs");
-const jwt = require("jsonwebtoken");
+const { connected } = require("process");
 
 //crée sauce
 exports.createSauce = (req, res, next) => {
@@ -34,7 +34,6 @@ exports.getOneSauce = (req, res, next) => {
 
 //modification d'une sauce
 exports.modifySauce = (req, res, next) => {
-  // if (sauce.userId == req.body.userId)
   const sauceObject = req.file
     ? {
         ...JSON.parse(req.body.sauce),
@@ -46,7 +45,7 @@ exports.modifySauce = (req, res, next) => {
 
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      if (sauce.userId == req.body.userId) {
+      if (sauce.userId == req.auth.userId) {
         Sauce.updateOne(
           { _id: req.params.id },
           { ...sauceObject, _id: req.params.id }
@@ -64,7 +63,7 @@ exports.modifySauce = (req, res, next) => {
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then((sauce) => {
-      if (sauce.userId == userId) {
+      if (sauce.userId == req.auth.userId) {
         const filename = sauce.imageUrl.split("/images/")[1];
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
@@ -72,7 +71,7 @@ exports.deleteSauce = (req, res, next) => {
             .catch((error) => res.status(400).json({ error }));
         });
       } else {
-        res.status(400).json({ message: "403: unauthorized request." });
+        res.status(403).json({ message: "403: unauthorized request." });
       }
     })
     .catch((error) => res.status(500).json({ error }));
